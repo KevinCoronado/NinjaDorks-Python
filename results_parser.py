@@ -1,17 +1,22 @@
 import json
 from rich.console import Console
 from rich.table import Table
+import os
 
 class ResultsParser:
     def __init__(self, resultados):
         self.resultados = resultados
         
-    def exportar_html(self, archivo_salida):
+    def exportar_html(self, archivo_salida, carpeta="Resultados_html"):
         """Exporta los resultados a un archivo HTML basándose en una plantilla.
 
         Args:
             archivo_salida (str): El nombre del archivo de salida donde se guardará el HTML.
         """
+        # Verificar si la carpeta existe y crearla si no.
+        if not os.path.exists(carpeta):
+            os.makedirs(carpeta)
+        
         # Lectura de la plantilla de informe HTML.
         with open("html_template.html", 'r', encoding='utf-8') as f:
             plantilla = f.read()
@@ -29,22 +34,28 @@ class ResultsParser:
         
         # Integración de los elementos en la plantilla y escritura al archivo de salida.
         informe_html = plantilla.replace('{{ resultados }}', elementos_html)
-        with open(archivo_salida, 'w', encoding='utf-8') as f:
+        archivo_salida_completo = os.path.join(carpeta, archivo_salida)
+        with open(archivo_salida_completo, 'w', encoding='utf-8') as f:
             f.write(informe_html)
-        print(f"Resultados exportados a HTML. Fichero creado: {archivo_salida}")        
+        print(f"Resultados exportados a HTML. Fichero creado: {archivo_salida_completo}")        
         
-    def exportar_json(self,archivo_salida):
-            with open(archivo_salida, 'w', encoding='utf-8') as f:
+    def exportar_json(self,archivo_salida,carpeta="Resultados_Json"):
+            if not os.path.exists(carpeta):
+                os.makedirs(carpeta)
+            
+            archivo_salida_completo = os.path.join(carpeta,archivo_salida)
+            
+            with open(archivo_salida_completo, 'w', encoding='utf-8') as f:
                 json.dump(self.resultados, f, ensure_ascii=False, indent=4)  
-            print("Resultados exportados a HTML. Fichero creado: {archivo_salida}") 
+            print(f"Resultados exportados a HTML. Fichero creado: {archivo_salida_completo}") 
     
     def mostrar_pantalla(self):
         consola = Console()
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("#", style="dim")
-        table.add_column("Titulo", width=50)
+        table.add_column("Titulo")
         table.add_column("Descripcion")
-        table.add_column("Enlace")
+        table.add_column("Enlace",width=55)
         
         for indice, resultado in enumerate(self.resultados, start=1):
             table.add_row(str(indice), resultado['title'], resultado['description'], resultado['link'])

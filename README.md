@@ -16,6 +16,7 @@ Google Dorks Generator and Searcher
    - DUCKDUCKGO (Not necessary, it was just a little experiment)
 
 4. You can do automated searches using Google dorks, download the results, generate Google dorks using OpenAI or a local model (this last one will download the model to your machine).
-5. Example: python ninjadorks.py -q 'filetype:pdf kittys' --pages 3 --download all 
+5. Example: ```bash
+python ninjadorks.py -q 'filetype:pdf kittys' --pages 3 --download all
 
 

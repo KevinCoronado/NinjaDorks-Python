@@ -1,0 +1,7 @@
+requests
+python-dotenv
+google-search-results
+rich
+gpt4all
+openai
+transformers

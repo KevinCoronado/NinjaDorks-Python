@@ -40,7 +40,7 @@ class IAAgent:
             print(f"Error al generar el dork: {e}")
             return None
             
-    
+    #Change this to english or any language do you speak :)
     def _build_prompt(self, description):
         return f"""
     Genera un Google Dork específico basado en la descripción del usuario. Un Google Dork utiliza operadores avanzados en motores de búsqueda para encontrar información específica que es difícil de encontrar mediante una búsqueda normal. Tu tarea es convertir la descripción del usuario en un Google Dork preciso. A continuación, se presentan algunos ejemplos de cómo deberías formular los Google Dorks basándote en diferentes descripciones:

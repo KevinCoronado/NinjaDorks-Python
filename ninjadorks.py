@@ -127,20 +127,7 @@ def main(query,configure_env, start_page, pages, lang, output_json, output_html,
             
 
     
-    
-    #---------Busquedas------------------
-    if not query:
-        print("Indica una consulta con el comando -q. Utiliza el comando -h para mostrar la ayuda")
-        sys.exit(1)    
-        
-        #Mostrar los resultados en linea por consola
-        rparser.mostrar_pantalla()
-    elif selenium:
-        browser = BrowserAutoSearch()
-        browser.search_google(query=query)
-        googleResultados = browser.google_search_results()
-        browser.quit()
-    else: 
+    if query:
         API_KEY_GOOGLE, SEARCH_ENGINE_ID = load_env(configure_env=configure_env)
         gsearch = GoogleSearch(API_KEY_GOOGLE,SEARCH_ENGINE_ID)
         googleResultados = gsearch.search(query,start_page=start_page,pages=pages,lang=lang)
@@ -150,7 +137,19 @@ def main(query,configure_env, start_page, pages, lang, output_json, output_html,
         
         rparser = ResultsParser(googleResultados)
         #rparser = ResultsParser(duckResultados)
+    #---------Busquedas------------------
+    if selenium:
+        browser = BrowserAutoSearch()
+        browser.search_google(query=query)
+        googleResultados = browser.google_search_results()
+        browser.quit()
+        
+    if not query:
+        print("Indica una consulta con el comando -q. Utiliza el comando -h para mostrar la ayuda")
+        sys.exit(1)    
+
     rparser.mostrar_pantalla()
+    
         
         
     if output_html:

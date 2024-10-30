@@ -1,46 +1,46 @@
 #Cargar las variables del entorno
-from dotenv import load_dotenv, set_key
-import os
-import sys
+from dotenv import load_dotenv, set_key  #Para cargar las variables de entorno
+import os                                #Permite interactuar con el Sistema operativo
+import sys                               # Se utiliza para interactuar con el entorno de ejecucion del interprete
 #clases
-from ai_agent import OpenAIGenerator, GPT4AllGenerator, IAAgent
-from browserautosearch import BrowserAutoSearch
+from ai_agent import OpenAIGenerator, GPT4AllGenerator, IAAgent  #Importa metodos de la clase GPT4LLGenerator
+from browserautosearch import BrowserAutoSearch #De aqui para abajo se importan las clases
 from google_search import GoogleSearch
 from duckduckgo_search import DuckDuckGoSearch
 from results_parser import ResultsParser
 from fileDownloader import FileDownloader
 from smartsearch import SmartSearch
-import argparse
+import argparse                                 #Argparse permite interactuar con el CLI permitiendo comandos personalizados
 
 #El codigo funciona con chrome principalmente, duckduckgo solo funciona los resultados en consola
 
-def env_config():
+def env_config():  #Funcion para config las ApiKeyS
     """
     Configurar el archivo .env con los valores proporcionados.
     """
     api_key = input("Introduce tu API KEY de Google: ")
     engine_id = input("Introduce el ID del buscador personalizado de Google")
-    set_key(".env","API_KEY_GOOGLE", api_key)
+    set_key(".env","API_KEY_GOOGLE", api_key)  #Establece la Api key en la variable con el nombre API_KEY_GOOGLE el valor de api_key
     set_key(".env","SEARCH_ENGINE_ID", engine_id)
     #set_key(".env","API_KEY_DUCKDUCKGO", Duck_id)
+    print("Archivo .env configurado satisfactoriamente.")
  
- 
-def openai_config():
+def openai_config():  #Esta funcion configura la Api key de OpenAI 
     """Configura la API KEY de OpenAI"""   
     api_key = input("Intorduce la API KEY de OpenAI")
     set_key(".env","OPENAI_API_KEY",api_key)
+    print("Archivo .env configurado satisfactoriamente.")
     
-def load_env(configure_env):
-    #Comprobamos si existe el ficher .env
-    env_exists = os.path.exists(".env")
-    
-    if not env_exists or configure_env:
+def load_env(configure_env):   
+    # Verificar la existencia del archivo .env y configuración del entorno
+    if configure_env or not os.path.exists(".env"):
         env_config()
-        print("Archivo .env configurado satisfactoriamente.")
         sys.exit(1)
     
     #Cargamos las variables en el entorno
     load_dotenv()
+    
+    
 
     #----------Google---------------------
     #Leemos la clave API (max. 100 peticiones/dia)
@@ -48,7 +48,7 @@ def load_env(configure_env):
 
     #Leemos el id del buscador
     SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
-
+    
 
     #---------Duck Duck Go--------------
     #Leemos la clave API de Duck Duck Go
@@ -65,7 +65,8 @@ def load_env(configure_env):
 
 def main(query,configure_env, start_page, pages, lang, output_json, output_html, download, gen_dork,dir_path, regex, prompt, model, max_tokens,selenium):
     
-       
+    if configure_env:
+        load_env(configure_env=configure_env)
 
     #Si hay directorio señalado es porque va a usar la IA para buscar en el fichero
     if dir_path:
@@ -77,6 +78,9 @@ def main(query,configure_env, start_page, pages, lang, output_json, output_html,
                 print(file)
                 for r in results:
                     print(f"\t- {r}")
+        else:
+            print("Falto seleccionar el prompt o regex")
+                
 
         if args.prompt:
             resultados = searcher.ia_search(prompt, model, max_tokens)
@@ -88,7 +92,8 @@ def main(query,configure_env, start_page, pages, lang, output_json, output_html,
                         print(f"\t- {r}")
             else:
                 print("No se ha realizado ningun movimiento y por lo tanto no ha habido cobro")
-        print("Falto seleccionar el prompt o regex")
+        else:
+            print("Falto seleccionar el prompt o regex")
         sys.exit(1)
     
     
@@ -145,7 +150,7 @@ def main(query,configure_env, start_page, pages, lang, output_json, output_html,
         
         rparser = ResultsParser(googleResultados)
         #rparser = ResultsParser(duckResultados)
-        rparser.mostrar_pantalla()
+    rparser.mostrar_pantalla()
         
         
     if output_html:

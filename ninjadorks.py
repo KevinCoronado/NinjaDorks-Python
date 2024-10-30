@@ -4,6 +4,7 @@ import os
 import sys
 #clases
 from ai_agent import OpenAIGenerator, GPT4AllGenerator, IAAgent
+from browserautosearch import BrowserAutoSearch
 from google_search import GoogleSearch
 from duckduckgo_search import DuckDuckGoSearch
 from results_parser import ResultsParser
@@ -28,9 +29,8 @@ def openai_config():
     """Configura la API KEY de OpenAI"""   
     api_key = input("Intorduce la API KEY de OpenAI")
     set_key(".env","OPENAI_API_KEY",api_key)
-
-
-def main(query, configure_env, start_page, pages, lang, output_json, output_html, download, gen_dork,dir_path, regex, prompt, model, max_tokens):
+    
+def load_env(configure_env):
     #Comprobamos si existe el ficher .env
     env_exists = os.path.exists(".env")
     
@@ -53,9 +53,19 @@ def main(query, configure_env, start_page, pages, lang, output_json, output_html
     #---------Duck Duck Go--------------
     #Leemos la clave API de Duck Duck Go
     #API_KEY_DUCKDUCKGO = os.getenv("API_KEY_DUCKDUCKGO")
+   
+        
     if not API_KEY_GOOGLE or not SEARCH_ENGINE_ID:
         print("ERROR: Falta la API_KEY o el SEARCH_ENGINE_ID. Por favor, ejecuta la opción --configure para configurar el archivo .env.")
-        sys.exit(1)    
+        sys.exit(1) 
+
+    return(API_KEY_GOOGLE, SEARCH_ENGINE_ID)
+        
+
+
+def main(query,configure_env, start_page, pages, lang, output_json, output_html, download, gen_dork,dir_path, regex, prompt, model, max_tokens,selenium):
+    
+       
 
     #Si hay directorio señalado es porque va a usar la IA para buscar en el fichero
     if dir_path:
@@ -91,6 +101,7 @@ def main(query, configure_env, start_page, pages, lang, output_json, output_html
         
         if respuesta.lower() in ("y","yes"):
             #Comprobamos si esta definida la API KEY de OpenAI en el fichero .env
+            load_dotenv()
             if not "OPENAI_API_KEY" in os.environ:
                 openai_config()
                 load_dotenv()
@@ -115,9 +126,17 @@ def main(query, configure_env, start_page, pages, lang, output_json, output_html
     #---------Busquedas------------------
     if not query:
         print("Indica una consulta con el comando -q. Utiliza el comando -h para mostrar la ayuda")
-        sys.exit(1)
+        sys.exit(1)    
         
-    if query:
+        #Mostrar los resultados en linea por consola
+        rparser.mostrar_pantalla()
+    elif selenium:
+        browser = BrowserAutoSearch()
+        browser.search_google(query=query)
+        googleResultados = browser.google_search_results()
+        browser.quit()
+    else: 
+        API_KEY_GOOGLE, SEARCH_ENGINE_ID = load_env(configure_env=configure_env)
         gsearch = GoogleSearch(API_KEY_GOOGLE,SEARCH_ENGINE_ID)
         googleResultados = gsearch.search(query,start_page=start_page,pages=pages,lang=lang)
 
@@ -126,12 +145,9 @@ def main(query, configure_env, start_page, pages, lang, output_json, output_html
         
         rparser = ResultsParser(googleResultados)
         #rparser = ResultsParser(duckResultados)
-        
-        
-        
-        #Mostrar los resultados en linea por consola
         rparser.mostrar_pantalla()
-    
+        
+        
     if output_html:
         rparser.exportar_html(output_html)
     if output_json:
@@ -165,6 +181,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--prompt", type=str, help="Prompt para búsqueda con IA en archivos.")
     parser.add_argument("-m", "--model", type=str, default="gpt-3.5-turbo-0125", help="Modelo de OpenAI.")
     parser.add_argument("--max_tokens", type=int, default=100, help="Número máximo de tokens.")
+    parser.add_argument("--selenium",action="store_true",default=False,help="Utiliza Selenium para realizar la busqueda de un navegador de manera automatica")
     args = parser.parse_args()
 
     main(query=args.query, 
@@ -180,4 +197,5 @@ if __name__ == "__main__":
          regex=args.regex,
          prompt=args.prompt,
          model=args.model,
-         max_tokens=args.max_tokens)
+         max_tokens=args.max_tokens,
+         selenium=args.selenium)
